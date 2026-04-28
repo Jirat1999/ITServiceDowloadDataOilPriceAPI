@@ -47,7 +47,7 @@ namespace ITServiceDowloadDataOilPriceAPI
                         int nSafeInterval = cConfig.oSettingConfig?.nIntervalMinutes <= 0 ? 1 : cConfig.oSettingConfig.nIntervalMinutes;
                         oLogger.LogInformation(">> Complete work. Waiting for the next round in {Mins} minutes...\n", nSafeInterval);
 
-                        await Task.Delay(5000, oStoppingToken);
+                        await Task.Delay(TimeSpan.FromMinutes(nSafeInterval), oStoppingToken);
                     }else
                     {
                         await Task.Delay(5000, oStoppingToken);
