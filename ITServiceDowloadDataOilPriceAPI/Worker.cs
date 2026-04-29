@@ -47,7 +47,7 @@ namespace ITServiceDowloadDataOilPriceAPI
                         int nSafeInterval = cConfig.oSettingConfig?.nIntervalMinutes <= 0 ? 1 : cConfig.oSettingConfig.nIntervalMinutes;
                         oLogger.LogInformation(">> Complete work. Waiting for the next round in {Mins} minutes...\n", nSafeInterval);
 
-                        await Task.Delay(5000, oStoppingToken);
+                        await Task.Delay(TimeSpan.FromMinutes(nSafeInterval), oStoppingToken);
                     }else
                     {
                         await Task.Delay(5000, oStoppingToken);
@@ -57,17 +57,13 @@ namespace ITServiceDowloadDataOilPriceAPI
                 {
                     oLogger.LogError(oEx, ">> Error occurred while executing the worker.");
 
-                    string tConnStr = $"Server={cConfig.oConnectionConfig.tServerDB};" +
-                                      $"Database={cConfig.oConnectionConfig.tNameDB};" +
-                                      $"User Id={cConfig.oConnectionConfig.tUser};" +
-                                      $"Password={cConfig.oConnectionConfig.tPassword};" +
-                                      $"Integrated Security={cConfig.oConnectionConfig.bIntegratedSecurity};" +
-                                      $"Encrypt={cConfig.oConnectionConfig.bEncrypt};" +
-                                      $"TrustServerCertificate={cConfig.oConnectionConfig.bTrustServerCertificate};";
+                    string tConnStr = cConnectionHelper.C_GETxConnectionString(cConfig.oConnectionConfig);
 
                     oLogger.LogInformation(">>> CHECK CONN STRING: {conn}", tConnStr);
 
-                    await oDBService.C_SAVxLogError(tConnStr, "Worker_ExecuteAsync",oEx.Message,oEx.StackTrace ?? "");
+                    var oLogHelper = new cDbLogHelper(oLogger);
+
+                    await oLogHelper.C_SAVxLogErrorAsync(tConnStr, "Worker_ExecuteAsync",oEx.Message,oEx.StackTrace ?? "");
 
                     await Task.Delay(5000,oStoppingToken);
                 }
