@@ -12,7 +12,7 @@ cConfig.oSettingConfig = oConfig.GetSection("oSettingConfig").Get<cmlSettings>()
 cConfig.oConnectionConfig = oConfig.GetSection("ConnectionConfig").Get<cmlConnectionConfig>() ?? new cmlConnectionConfig();
 cConfig.oApiConfig = oConfig.GetSection("ApiConfig").Get<cmlApiConfig>() ?? new cmlApiConfig();
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<cApiService>();
 builder.Services.AddTransient<cApiService>();
 builder.Services.AddTransient<cDatabaseService>();
 builder.Services.AddHostedService<Worker>();

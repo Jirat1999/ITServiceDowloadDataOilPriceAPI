@@ -33,6 +33,13 @@ namespace ITServiceDowloadDataOilPriceAPI.Class
             return oSql.ToString();
         }
 
+        public static string C_GETxAllStations()
+        {
+            StringBuilder oSql = new StringBuilder();
+            oSql.AppendLine($"SELECT FTCode, FNStationId FROM {cmlTable.tTCNM_MASTER_Stations};");
+            return oSql.ToString();
+        }
+
         // ==========================================
         // 2. TCNM_MASTER_FuelTypes (ชนิดน้ำมัน)
         // ==========================================
@@ -55,6 +62,13 @@ namespace ITServiceDowloadDataOilPriceAPI.Class
         {
             StringBuilder oSql = new StringBuilder();
             oSql.AppendLine($"UPDATE {cmlTable.tTCNM_MASTER_FuelTypes} SET FTName = @Name, FDUpdatedAt = GETDATE() WHERE FTCode = @Code;");
+            return oSql.ToString();
+        }
+
+        public static string C_GETxAllFuelTypes()
+        {
+            StringBuilder oSql = new StringBuilder();
+            oSql.AppendLine($"SELECT FTCode, FNFuelTypeId FROM {cmlTable.tTCNM_MASTER_FuelTypes};");
             return oSql.ToString();
         }
 
@@ -96,6 +110,15 @@ namespace ITServiceDowloadDataOilPriceAPI.Class
             StringBuilder oSql = new StringBuilder();
             oSql.AppendLine($"UPDATE {cmlTable.tTCNM_PRICE_FuelPrices} SET FCPrice = @Price");
             oSql.AppendLine($"WHERE FNStationId = @StationId AND FNFuelTypeId = @FuelTypeId AND FDEffectiveDate = @Date;");
+            return oSql.ToString();
+        }
+
+        public static string C_GETxPricesByDate()
+        {
+            StringBuilder oSql = new StringBuilder();
+            oSql.AppendLine($"SELECT FNStationId AS nFNStationId, FNFuelTypeId AS nFNFuelTypeId, FCPrice AS cFCPrice");
+            oSql.AppendLine($"FROM {cmlTable.tTCNM_PRICE_FuelPrices}");
+            oSql.AppendLine($"WHERE CAST(FDEffectiveDate AS DATE) = CAST(@Date AS DATE);");
             return oSql.ToString();
         }
 

@@ -9,6 +9,6 @@ namespace ITServiceDowloadDataOilPriceAPI.Models.Database
         public int nFNStationId { get; set; }
         public int nFNFuelTypeId { get; set; }
         public DateTime dFDEffactiveDate { get; set; }
-        public decimal cFCPeice { get; set; }
+        public decimal cFCPrice { get; set; }
     }
 }

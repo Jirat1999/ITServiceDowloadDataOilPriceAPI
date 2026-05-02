@@ -12,6 +12,8 @@ namespace ITServiceDowloadDataOilPriceAPI.Models
         public string tStatus { get; set; }
         [JsonPropertyName("response")]
         public cmlFuelData poResponse { get; set; }
+        [JsonIgnore]
+        public string tRawJson { get; set; }
     }
 
     public class cmlFuelData

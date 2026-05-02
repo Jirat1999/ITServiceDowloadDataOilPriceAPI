@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -21,15 +20,16 @@ namespace ITServiceDowloadDataOilPriceAPI
             this.oApiService = oApiService;
             this.oDBService = oDBService;
         }
+
         protected override async Task ExecuteAsync(CancellationToken oStoppingToken)
         {
-            while(!oStoppingToken.IsCancellationRequested)
+            while (!oStoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     bool bScheduleTrigger = (cConfig.oSettingConfig?.tMode == "OilPrice");
 
-                    if(bScheduleTrigger || (cConfig.oSettingConfig?.bManualTrigger ?? false))
+                    if (bScheduleTrigger || (cConfig.oSettingConfig?.bManualTrigger ?? false))
                     {
                         oLogger.LogInformation(">> Triggered work process.");
 
@@ -37,7 +37,8 @@ namespace ITServiceDowloadDataOilPriceAPI
 
                         if (oData != null && !string.IsNullOrEmpty(tJon))
                         {
-                            await oDBService.cSaveToDatabaseAsync(oData, tJon);
+                            oData.tRawJson = tJon;
+                            await oDBService.cSaveToDatabaseAsync(oData);
                         }
                         else
                         {
@@ -48,24 +49,28 @@ namespace ITServiceDowloadDataOilPriceAPI
                         oLogger.LogInformation(">> Complete work. Waiting for the next round in {Mins} minutes...\n", nSafeInterval);
 
                         await Task.Delay(TimeSpan.FromMinutes(nSafeInterval), oStoppingToken);
-                    }else
+                    }
+                    else
                     {
                         await Task.Delay(5000, oStoppingToken);
                     }
-                } 
-                catch (Exception oEx) 
+                }
+                catch (Exception oEx)
                 {
-                    oLogger.LogError(oEx, ">> Error occurred while executing the worker.");
+                    oLogger.LogError(oEx, ">> CRITICAL: Worker loop encountered an error! {Msg}", oEx.Message);
 
-                    string tConnStr = cConnectionHelper.C_GETxConnectionString(cConfig.oConnectionConfig);
+                    try
+                    {
+                        string tConnStr = cConnectionHelper.C_GETxConnectionString(cConfig.oConnectionConfig);
+                        var oLogHelper = new cDbLogHelper(oLogger);
+                        await oLogHelper.C_SAVxLogErrorAsync(tConnStr, "Worker_ExecuteAsync", oEx.Message, oEx.StackTrace ?? "");
+                    }
+                    catch (Exception oInnerEx)
+                    {
+                        oLogger.LogError(oInnerEx, ">> FATAL: Failed to log error to database.");
+                    }
 
-                    oLogger.LogInformation(">>> CHECK CONN STRING: {conn}", tConnStr);
-
-                    var oLogHelper = new cDbLogHelper(oLogger);
-
-                    await oLogHelper.C_SAVxLogErrorAsync(tConnStr, "Worker_ExecuteAsync",oEx.Message,oEx.StackTrace ?? "");
-
-                    await Task.Delay(5000,oStoppingToken);
+                    await Task.Delay(5000, oStoppingToken);
                 }
             }
         }

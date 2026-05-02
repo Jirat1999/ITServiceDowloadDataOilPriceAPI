@@ -20,7 +20,8 @@ namespace ITServiceDowloadDataOilPriceAPI.Class
             try
             {
                 using var oConnErr = new SqlConnection(tConnStr);
-                await oConnErr.ExecuteAsync(cSqlCommands.C_GETxInsertErrorLogs(), new { Proc = tProcess, Msg = tMsg, Stack = tStackTrace });
+                await oConnErr.ExecuteAsync(cSqlCommands.C_GETxInsertErrorLogs(), 
+                    new { Proc = tProcess, Msg = tMsg, Stack = tStackTrace });
             }
             catch (Exception oEx)
             {
